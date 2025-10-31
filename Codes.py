@@ -1,14 +1,5 @@
 """
-3D Fox Treasure Hunt Game with Bluetooth Joystick Control
-Enhanced environment with houses, landmarks, and treasure hunting mechanics
-
-Requirements:
-pip install pygame PyOpenGL pyserial
-
-Hardware Setup:
-- Arduino with HC-05/HC-06 Bluetooth module
-- Joystick connected to Arduino
-- Bluetooth paired with computer
+3D Fox Treasure Hunt Game - BACK + FRONT VIEW + EXPLORABLE HOUSE HINTS
 """
 
 import pygame
@@ -52,62 +43,33 @@ class Fox3D:
         }
     
     def draw_cube(self, width, height, depth, color):
-        """Draw a colored cube"""
         glColor3f(*color)
         w, h, d = width/2, height/2, depth/2
-        
         glBegin(GL_QUADS)
-        glVertex3f(-w, -h, d)
-        glVertex3f(w, -h, d)
-        glVertex3f(w, h, d)
-        glVertex3f(-w, h, d)
-        
-        glVertex3f(-w, -h, -d)
-        glVertex3f(-w, h, -d)
-        glVertex3f(w, h, -d)
-        glVertex3f(w, -h, -d)
-        
-        glVertex3f(-w, h, -d)
-        glVertex3f(-w, h, d)
-        glVertex3f(w, h, d)
-        glVertex3f(w, h, -d)
-        
-        glVertex3f(-w, -h, -d)
-        glVertex3f(w, -h, -d)
-        glVertex3f(w, -h, d)
-        glVertex3f(-w, -h, d)
-        
-        glVertex3f(w, -h, -d)
-        glVertex3f(w, h, -d)
-        glVertex3f(w, h, d)
-        glVertex3f(w, -h, d)
-        
-        glVertex3f(-w, -h, -d)
-        glVertex3f(-w, -h, d)
-        glVertex3f(-w, h, d)
-        glVertex3f(-w, h, -d)
+        glVertex3f(-w, -h, d); glVertex3f(w, -h, d); glVertex3f(w, h, d); glVertex3f(-w, h, d)
+        glVertex3f(-w, -h, -d); glVertex3f(-w, h, -d); glVertex3f(w, h, -d); glVertex3f(w, -h, -d)
+        glVertex3f(-w, h, -d); glVertex3f(-w, h, d); glVertex3f(w, h, d); glVertex3f(w, h, -d)
+        glVertex3f(-w, -h, -d); glVertex3f(w, -h, -d); glVertex3f(w, -h, d); glVertex3f(-w, -h, d)
+        glVertex3f(w, -h, -d); glVertex3f(w, h, -d); glVertex3f(w, h, d); glVertex3f(w, -h, d)
+        glVertex3f(-w, -h, -d); glVertex3f(-w, -h, d); glVertex3f(-w, h, d); glVertex3f(-w, h, -d)
         glEnd()
     
     def draw_sphere(self, radius, color, slices=20, stacks=20):
-        """Draw a colored sphere"""
         glColor3f(*color)
         quad = gluNewQuadric()
         gluSphere(quad, radius, slices, stacks)
     
     def draw_cylinder(self, radius, height, color, slices=20):
-        """Draw a colored cylinder"""
         glColor3f(*color)
         quad = gluNewQuadric()
         gluCylinder(quad, radius, radius, height, slices, 1)
     
     def draw_cone(self, base_radius, height, color, slices=20):
-        """Draw a colored cone"""
         glColor3f(*color)
         quad = gluNewQuadric()
         gluCylinder(quad, base_radius, 0, height, slices, 1)
     
     def draw_head(self):
-        """Draw the fox's head with ears, eyes, snout"""
         glPushMatrix()
         glTranslatef(0, 1.5, 0)
         glRotatef(self.head_tilt, 1, 0, 0)
@@ -186,7 +148,6 @@ class Fox3D:
         glPopMatrix()
     
     def draw_body(self):
-        """Draw the fox's torso"""
         glPushMatrix()
         glTranslatef(0, 0.6, 0)
         
@@ -204,7 +165,6 @@ class Fox3D:
         glPopMatrix()
     
     def draw_arm(self, side):
-        """Draw an arm/front leg"""
         glPushMatrix()
         glTranslatef(side * 0.35, 0.4, 0.2)
         
@@ -240,7 +200,6 @@ class Fox3D:
         glPopMatrix()
     
     def draw_leg(self, side):
-        """Draw a back leg"""
         glPushMatrix()
         glTranslatef(side * 0.3, 0.2, -0.2)
         
@@ -279,7 +238,6 @@ class Fox3D:
         glPopMatrix()
     
     def draw_tail(self):
-        """Draw the fox's bushy tail"""
         glPushMatrix()
         glTranslatef(0, 0.7, -0.5)
         
@@ -310,7 +268,6 @@ class Fox3D:
         glPopMatrix()
     
     def move_continuous(self, direction, speed=0.15):
-        """Move continuously in a direction"""
         angle_rad = math.radians(self.rotation[1])
         
         if direction == 'forward':
@@ -330,7 +287,6 @@ class Fox3D:
             self.is_walking = True
     
     def update_animation(self):
-        """Update animation parameters"""
         self.animation_frame += 1
         
         if self.is_jumping:
@@ -349,9 +305,7 @@ class Fox3D:
             self.walk_cycle = 0
     
     def draw(self):
-        """Draw the complete fox"""
         glPushMatrix()
-        
         glTranslatef(*self.position)
         glTranslatef(0, self.jump_offset, 0)
         glRotatef(self.rotation[0], 1, 0, 0)
@@ -370,8 +324,6 @@ class Fox3D:
 
 
 class TreasureHuntEnvironment:
-    """Large treasure hunting environment with landmarks"""
-    
     def __init__(self):
         self.trees = []
         self.bushes = []
@@ -380,20 +332,19 @@ class TreasureHuntEnvironment:
         self.landmarks = []
         self.current_treasure = None
         self.treasure_found = False
-        
+        self.used_landmarks = []
+        self.all_landmarks_used = False
+
         self.generate_environment()
         self.spawn_new_treasure()
     
     def generate_environment(self):
-        """Generate a large world with various features"""
-        # Dense forest area (north)
         for _ in range(40):
             x = random.uniform(-40, 40)
             z = random.uniform(-80, -40)
             size = random.uniform(0.8, 1.8)
             self.trees.append((x, z, size))
         
-        # Scattered trees throughout
         for _ in range(30):
             x = random.uniform(-40, 40)
             z = random.uniform(-40, 40)
@@ -401,7 +352,6 @@ class TreasureHuntEnvironment:
                 size = random.uniform(0.7, 1.5)
                 self.trees.append((x, z, size))
         
-        # Village houses (west side)
         house_positions = [
             (-35, -10), (-35, -20), (-28, -12), (-28, -22),
             (-35, 5), (-28, 8), (-35, 15)
@@ -414,7 +364,6 @@ class TreasureHuntEnvironment:
             ])
             self.houses.append((x, z, color))
         
-        # Bushes everywhere
         for _ in range(60):
             x = random.uniform(-45, 45)
             z = random.uniform(-85, 45)
@@ -422,7 +371,6 @@ class TreasureHuntEnvironment:
                 size = random.uniform(0.3, 0.7)
                 self.bushes.append((x, z, size))
         
-        # Flower meadow (east side)
         for _ in range(80):
             x = random.uniform(20, 40)
             z = random.uniform(-20, 20)
@@ -432,7 +380,6 @@ class TreasureHuntEnvironment:
             ])
             self.flowers.append((x, z, color))
         
-        # Landmarks
         self.landmarks = [
             {'type': 'well', 'pos': (15, -15), 'name': 'Old Stone Well'},
             {'type': 'statue', 'pos': (0, 30), 'name': 'Ancient Fox Statue'},
@@ -443,20 +390,23 @@ class TreasureHuntEnvironment:
         ]
     
     def spawn_new_treasure(self):
-        """Spawn a new treasure at a random landmark"""
         self.treasure_found = False
-        landmark = random.choice(self.landmarks)
+        available_landmarks = [lm for lm in self.landmarks if lm not in self.used_landmarks]
+        if not available_landmarks:
+            self.all_landmarks_used = True
+            return
+        landmark = random.choice(available_landmarks)
+        self.used_landmarks.append(landmark)
         self.current_treasure = {
             'landmark': landmark,
             'pos': landmark['pos'],
             'hint': self.generate_hint(landmark)
         }
-        print(f"\n🗺️  NEW TREASURE HUNT!")
+        print(f"\nNEW TREASURE HUNT! ({len(self.used_landmarks)}/6)")
         print(f"Hint: {self.current_treasure['hint']}")
         print("="*60)
     
     def generate_hint(self, landmark):
-        """Generate a cryptic hint for the treasure location"""
         hints = {
             'well': "Where villagers once drew water from deep below, the treasure awaits near the stone circle.",
             'statue': "Seek the guardian of the south, a monument to foxes of old standing tall.",
@@ -468,26 +418,26 @@ class TreasureHuntEnvironment:
         return hints.get(landmark['type'], "The treasure is hidden somewhere special...")
     
     def check_treasure_proximity(self, fox_pos):
-        """Check if fox is near the treasure"""
-        if self.treasure_found or not self.current_treasure:
+        if self.treasure_found or not self.current_treasure or self.all_landmarks_used:
             return False
-        
         tx, tz = self.current_treasure['pos']
         distance = math.sqrt((fox_pos[0] - tx)**2 + (fox_pos[2] - tz)**2)
-        
         if distance < 3.0:
             self.treasure_found = True
             print("\n" + "="*60)
-            print("🎉 TREASURE FOUND! 🎉")
+            print("TREASURE FOUND!")
             print(f"You discovered the treasure at {self.current_treasure['landmark']['name']}!")
+            print(f"Progress: {len(self.used_landmarks)}/6 treasures")
             print("="*60)
             time.sleep(1)
+            if len(self.used_landmarks) >= len(self.landmarks):
+                self.all_landmarks_used = True
+                return True
             self.spawn_new_treasure()
             return True
         return False
-    
+
     def draw_cube_helper(self, w, h, d):
-        """Helper to draw cube"""
         w, h, d = w/2, h/2, d/2
         glBegin(GL_QUADS)
         glVertex3f(-w, -h, d); glVertex3f(w, -h, d); glVertex3f(w, h, d); glVertex3f(-w, h, d)
@@ -499,7 +449,6 @@ class TreasureHuntEnvironment:
         glEnd()
     
     def draw_pyramid_helper(self):
-        """Draw pyramid for roof"""
         glBegin(GL_TRIANGLES)
         glVertex3f(0, 1, 0); glVertex3f(-1, 0, 1); glVertex3f(1, 0, 1)
         glVertex3f(0, 1, 0); glVertex3f(1, 0, 1); glVertex3f(1, 0, -1)
@@ -508,27 +457,20 @@ class TreasureHuntEnvironment:
         glEnd()
     
     def draw_house(self, x, z, color):
-        """Draw a detailed house"""
         glPushMatrix()
         glTranslatef(x, 0, z)
-        
-        # Foundation
         glColor3f(0.4, 0.3, 0.25)
         glPushMatrix()
         glTranslatef(0, -1.3, 0)
         glScalef(3.2, 0.4, 3.2)
         self.draw_cube_helper(1, 1, 1)
         glPopMatrix()
-        
-        # Walls
         glColor3f(*color)
         glPushMatrix()
         glTranslatef(0, 0.5, 0)
         glScalef(3, 2, 3)
         self.draw_cube_helper(1, 1, 1)
         glPopMatrix()
-        
-        # Roof
         glColor3f(0.3, 0.15, 0.1)
         glPushMatrix()
         glTranslatef(0, 2.2, 0)
@@ -536,16 +478,12 @@ class TreasureHuntEnvironment:
         glScalef(2.2, 1, 2.2)
         self.draw_pyramid_helper()
         glPopMatrix()
-        
-        # Door
         glColor3f(0.2, 0.1, 0.05)
         glPushMatrix()
         glTranslatef(0, -0.1, 1.51)
         glScalef(0.6, 1.2, 0.1)
         self.draw_cube_helper(1, 1, 1)
         glPopMatrix()
-        
-        # Windows
         glColor3f(0.6, 0.8, 1.0)
         for wx in [-0.8, 0.8]:
             glPushMatrix()
@@ -553,25 +491,19 @@ class TreasureHuntEnvironment:
             glScalef(0.5, 0.5, 0.05)
             self.draw_cube_helper(1, 1, 1)
             glPopMatrix()
-        
-        # Chimney
         glColor3f(0.5, 0.3, 0.2)
         glPushMatrix()
         glTranslatef(0.8, 2.8, 0.8)
         glScalef(0.4, 1.2, 0.4)
         self.draw_cube_helper(1, 1, 1)
         glPopMatrix()
-        
         glPopMatrix()
     
     def draw_landmark(self, landmark):
-        """Draw various landmarks"""
         ltype = landmark['type']
         x, z = landmark['pos']
-        
         glPushMatrix()
         glTranslatef(x, 0, z)
-        
         if ltype == 'well':
             glColor3f(0.5, 0.5, 0.5)
             quad = gluNewQuadric()
@@ -586,7 +518,6 @@ class TreasureHuntEnvironment:
             glScalef(1.2, 0.8, 1.2)
             self.draw_pyramid_helper()
             glPopMatrix()
-            
         elif ltype == 'statue':
             glColor3f(0.6, 0.6, 0.6)
             glPushMatrix()
@@ -601,7 +532,6 @@ class TreasureHuntEnvironment:
             sphere = gluNewQuadric()
             gluSphere(sphere, 1, 12, 12)
             glPopMatrix()
-            
         elif ltype == 'pond':
             glColor3f(0.2, 0.4, 0.8)
             glBegin(GL_TRIANGLE_FAN)
@@ -610,7 +540,6 @@ class TreasureHuntEnvironment:
                 rad = math.radians(angle)
                 glVertex3f(math.cos(rad) * 3, -1.4, math.sin(rad) * 3)
             glEnd()
-            
         elif ltype == 'rock':
             glColor3f(0.4, 0.4, 0.4)
             glPushMatrix()
@@ -619,7 +548,6 @@ class TreasureHuntEnvironment:
             sphere = gluNewQuadric()
             gluSphere(sphere, 1, 10, 10)
             glPopMatrix()
-            
         elif ltype == 'bridge':
             glColor3f(0.5, 0.35, 0.2)
             for i in range(-2, 3):
@@ -628,7 +556,6 @@ class TreasureHuntEnvironment:
                 glScalef(0.3, 0.1, 2)
                 self.draw_cube_helper(1, 1, 1)
                 glPopMatrix()
-                
         elif ltype == 'windmill':
             glColor3f(0.9, 0.9, 0.9)
             quad = gluNewQuadric()
@@ -647,14 +574,11 @@ class TreasureHuntEnvironment:
                 self.draw_cube_helper(1, 1, 1)
                 glPopMatrix()
             glPopMatrix()
-        
         glPopMatrix()
     
     def draw_tree(self, x, z, size):
-        """Draw a tree"""
         glPushMatrix()
         glTranslatef(x, 0, z)
-        
         glColor3f(0.4, 0.25, 0.1)
         glPushMatrix()
         glTranslatef(0, 0.5 * size, 0)
@@ -662,7 +586,6 @@ class TreasureHuntEnvironment:
         quad = gluNewQuadric()
         gluCylinder(quad, 0.15 * size, 0.12 * size, 1.0 * size, 8, 1)
         glPopMatrix()
-        
         glColor3f(0.1, 0.5, 0.1)
         for i in range(3):
             glPushMatrix()
@@ -670,15 +593,12 @@ class TreasureHuntEnvironment:
             sphere = gluNewQuadric()
             gluSphere(sphere, 0.6 * size * (1.2 - i * 0.2), 12, 12)
             glPopMatrix()
-        
         glPopMatrix()
     
     def draw_bush(self, x, z, size):
-        """Draw a bush"""
         glPushMatrix()
         glTranslatef(x, 0.3 * size, z)
         glColor3f(0.15, 0.6, 0.15)
-        
         for i in range(3):
             offset_x = (i - 1) * 0.3 * size
             glPushMatrix()
@@ -686,63 +606,47 @@ class TreasureHuntEnvironment:
             sphere = gluNewQuadric()
             gluSphere(sphere, 0.4 * size, 10, 10)
             glPopMatrix()
-        
         glPopMatrix()
     
     def draw_flower(self, x, z, color):
-        """Draw a flower"""
         glPushMatrix()
         glTranslatef(x, 0.0, z)
-        
         glColor3f(0.1, 0.6, 0.1)
         glPushMatrix()
         glRotatef(-90, 1, 0, 0)
         quad = gluNewQuadric()
         gluCylinder(quad, 0.02, 0.02, 0.3, 4, 1)
         glPopMatrix()
-        
         glTranslatef(0, 0.3, 0)
         glColor3f(*color)
         sphere = gluNewQuadric()
         gluSphere(sphere, 0.08, 6, 6)
-        
         glPopMatrix()
     
     def draw_treasure_indicator(self):
-        """Draw spinning treasure chest at current treasure location"""
-        if self.treasure_found or not self.current_treasure:
+        if self.treasure_found or not self.current_treasure or self.all_landmarks_used:
             return
-        
         x, z = self.current_treasure['pos']
-        
         glPushMatrix()
         glTranslatef(x, 0.5, z)
         glRotatef(time.time() * 50, 0, 1, 0)
-        
-        # Chest body
         glColor3f(0.6, 0.4, 0.1)
         glPushMatrix()
         glScalef(0.8, 0.5, 0.6)
         self.draw_cube_helper(1, 1, 1)
         glPopMatrix()
-        
-        # Chest lid
         glColor3f(0.5, 0.3, 0.08)
         glPushMatrix()
         glTranslatef(0, 0.35, 0)
         glScalef(0.85, 0.2, 0.65)
         self.draw_cube_helper(1, 1, 1)
         glPopMatrix()
-        
-        # Gold lock
         glColor3f(1.0, 0.84, 0.0)
         glPushMatrix()
         glTranslatef(0, 0.0, 0.31)
         sphere = gluNewQuadric()
         gluSphere(sphere, 0.08, 8, 8)
         glPopMatrix()
-        
-        # Sparkle effect
         glColor3f(1.0, 1.0, 0.5)
         for i in range(4):
             glPushMatrix()
@@ -751,14 +655,10 @@ class TreasureHuntEnvironment:
             sphere = gluNewQuadric()
             gluSphere(sphere, 0.05, 4, 4)
             glPopMatrix()
-        
         glPopMatrix()
     
     def draw_ground(self):
-        """Draw large textured ground plane"""
         glDisable(GL_LIGHTING)
-        
-        # Main grass
         glColor3f(0.2, 0.6, 0.2)
         glBegin(GL_QUADS)
         glVertex3f(-50, -1.5, 50)
@@ -766,8 +666,6 @@ class TreasureHuntEnvironment:
         glVertex3f(50, -1.5, -90)
         glVertex3f(-50, -1.5, -90)
         glEnd()
-        
-        # Dirt path through village
         glColor3f(0.5, 0.4, 0.3)
         glBegin(GL_QUADS)
         glVertex3f(-38, -1.48, 30)
@@ -775,8 +673,6 @@ class TreasureHuntEnvironment:
         glVertex3f(-25, -1.48, -30)
         glVertex3f(-38, -1.48, -30)
         glEnd()
-        
-        # Grid for reference
         glColor3f(0.25, 0.65, 0.25)
         glBegin(GL_LINES)
         for i in range(-50, 51, 5):
@@ -785,34 +681,47 @@ class TreasureHuntEnvironment:
             glVertex3f(-50, -1.49, i)
             glVertex3f(50, -1.49, i)
         glEnd()
-        
         glEnable(GL_LIGHTING)
     
-    def draw(self):
-        """Draw entire environment"""
+    def draw_3d_text(self, text, x, y, z, color=(1,1,1)):
+        glPushMatrix()
+        glTranslatef(x, y, z)
+        glColor3f(*color)
+        modelview = glGetFloatv(GL_MODELVIEW_MATRIX)
+        glLoadIdentity()
+        glTranslatef(x, y, z)
+        glMultMatrixf(modelview)
+        glRotatef(180, 0, 1, 0)
+        try:
+            import OpenGL.GLUT as glut
+            glRasterPos3f(0, 0, 0)
+            for char in text:
+                glut.glutBitmapCharacter(glut.GLUT_BITMAP_HELVETICA_18, ord(char))
+        except:
+            pass
+        glPopMatrix()
+    
+    def draw(self, fox_pos):
         self.draw_ground()
-        
         for x, z, size in self.trees:
             self.draw_tree(x, z, size)
-        
         for x, z, size in self.bushes:
             self.draw_bush(x, z, size)
-        
         for x, z, color in self.flowers:
             self.draw_flower(x, z, color)
         
-        for x, z, color in self.houses:
-            self.draw_house(x, z, color)
-        
+        for hx, hz, hcolor in self.houses:
+            self.draw_house(hx, hz, hcolor)
+            dist = math.hypot(fox_pos[0] - hx, fox_pos[2] - hz)
+            if dist < 5.0:
+                self.draw_3d_text("This place looks worth exploring!", hx, 3.5, hz, (0.2, 0.8, 0.2))
+
         for landmark in self.landmarks:
             self.draw_landmark(landmark)
-        
         self.draw_treasure_indicator()
 
 
 class BluetoothReceiver:
-    """Handles Bluetooth serial communication"""
-    
     def __init__(self):
         self.serial_conn = None
         self.command_queue = queue.Queue()
@@ -821,38 +730,29 @@ class BluetoothReceiver:
         self.port = None
         
     def find_port(self):
-        """Find available serial ports"""
         ports = serial.tools.list_ports.comports()
         available_ports = []
-        
         print("\n" + "="*60)
         print("Available Serial Ports:")
         print("="*60)
-        
         for i, port in enumerate(ports):
             print(f"  [{i}] {port.device} - {port.description}")
             available_ports.append(port.device)
-            
             if 'HC-05' in port.description or 'HC-06' in port.description or 'Bluetooth' in port.description:
                 print(f"      ^ Bluetooth device detected!")
                 self.port = port.device
-        
         if not available_ports:
             print("  No serial ports found!")
             return None
-            
         return available_ports
     
     def connect(self, port=None, baudrate=38400):
-        """Connect to serial port"""
         if port:
             self.port = port
-        
         if not self.port:
             available = self.find_port()
             if not available:
                 return False
-                
             if not self.port:
                 try:
                     print("\nEnter port number to use (or 'q' to skip): ", end='')
@@ -866,34 +766,26 @@ class BluetoothReceiver:
                 except (ValueError, IndexError):
                     print("Invalid selection")
                     return False
-        
         try:
             print(f"\nConnecting to {self.port} at {baudrate} baud...")
-            self.serial_conn = serial.Serial(
-                port=self.port,
-                baudrate=baudrate,
-                timeout=0.1
-            )
+            self.serial_conn = serial.Serial(port=self.port, baudrate=baudrate, timeout=0.1)
             time.sleep(2)
             self.connected = True
-            print("✓ Bluetooth connected!")
+            print("Bluetooth connected!")
             return True
         except serial.SerialException as e:
-            print(f"✗ Connection failed: {e}")
+            print(f"Connection failed: {e}")
             return False
     
     def start_listening(self):
-        """Start listening thread"""
         if not self.connected:
             return False
-            
         self.running = True
         listen_thread = threading.Thread(target=self._listen_loop, daemon=True)
         listen_thread.start()
         return True
     
     def _listen_loop(self):
-        """Main listening loop"""
         while self.running:
             try:
                 if self.serial_conn and self.serial_conn.in_waiting > 0:
@@ -905,38 +797,32 @@ class BluetoothReceiver:
                 break
             except UnicodeDecodeError:
                 pass
-            
             time.sleep(0.01)
     
     def get_command(self):
-        """Get next command"""
         try:
             return self.command_queue.get_nowait()
         except queue.Empty:
             return None
     
     def stop(self):
-        """Stop and close"""
         self.running = False
         if self.serial_conn and self.serial_conn.is_open:
             self.serial_conn.close()
 
 
 class FoxTreasureHuntGame:
-    """Main game class"""
-    
     def __init__(self):
         pygame.init()
         self.display = (1024, 768)
         self.screen = pygame.display.set_mode(self.display, DOUBLEBUF | OPENGL)
-        pygame.display.set_caption("Fox Treasure Hunt - Bluetooth Control")
+        pygame.display.set_caption("Fox Treasure Hunt - F = Toggle View")
         
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
         glEnable(GL_COLOR_MATERIAL)
         glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE)
-        
         glClearColor(0.53, 0.81, 0.92, 1.0)
         
         glLight(GL_LIGHT0, GL_POSITION, (10, 15, 5, 1))
@@ -963,30 +849,17 @@ class FoxTreasureHuntGame:
         self.small_font = pygame.font.Font(None, 24)
         self.big_font = pygame.font.Font(None, 48)
         
-        # Game state
-        self.game_state = 'intro'  # intro, playing, won, lost
-        self.timer = 120  # 2 minutes per treasure
+        self.game_state = 'intro'
+        self.timer = 120
         self.score = 0
         self.treasures_found = 0
-        self.intro_screen_shown = False
         self.game_over_time = 0
-        
-        # Camera settings
-        self.camera_view = 'back'  # 'back' or 'front'Font(None, 24)
-        self.big_font = pygame.font.Font(None, 48)
-        
-        # Game state
-        self.game_state = 'intro'  # intro, playing, won, lost
-        self.timer = 120  # 2 minutes per treasure
-        self.score = 0
-        self.treasures_found = 0
-        self.intro_screen_shown = False
-        self.game_over_time = 0
-    
+
+        # NEW: Camera mode
+        self.front_view = False  # False = Back view, True = Front view
+
     def handle_command(self, command):
-        """Handle control commands"""
         command = command.lower().strip()
-        
         if command == 'forward':
             self.current_direction = 'forward'
             self.movement_timeout = 60
@@ -1016,7 +889,6 @@ class FoxTreasureHuntGame:
             self.fox.is_dancing = not self.fox.is_dancing
     
     def process_movements(self):
-        """Process movements"""
         if self.movement_timeout > 0:
             self.movement_timeout -= 1
         else:
@@ -1028,47 +900,48 @@ class FoxTreasureHuntGame:
         else:
             self.fox.is_walking = False
         
-        # Check if treasure found
-        if self.environment.check_treasure_proximity(self.fox.position):
-            self.treasures_found += 1
-            self.score += int(self.timer * 10)  # Bonus points for time remaining
-            self.timer = 120  # Reset timer for next treasure
-            
-            # Celebrate!
-            self.fox.is_dancing = True
-            self.fox.is_jumping = True
-    
+        if not self.environment.all_landmarks_used:
+            if self.environment.check_treasure_proximity(self.fox.position):
+                self.treasures_found += 1
+                self.score += int(self.timer * 10)
+                self.timer = 120
+                self.fox.is_dancing = True
+                self.fox.is_jumping = True
+                self.fox.animation_frame = 0
+
     def update_timer(self):
-        """Update game timer"""
         if self.game_state == 'playing':
-            self.timer -= 1/60  # Decrease by 1 second per 60 frames
-            
-            if self.timer <= 0:
+            self.timer -= 1/60
+            if self.timer <= 40:
                 self.game_state = 'lost'
                 self.game_over_time = time.time()
                 print("\n" + "="*60)
-                print("⏰ TIME'S UP! GAME OVER!")
-                print(f"Treasures Found: {self.treasures_found}")
+                print("40 SECONDS LEFT — TIME'S UP!")
+                print(f"Treasures Found: {self.treasures_found}/6")
                 print(f"Final Score: {self.score}")
+                print("YOU LOSE!")
                 print("="*60)
-    
+                return
+            if self.environment.all_landmarks_used:
+                self.game_state = 'won'
+                self.game_over_time = time.time()
+                print("\n" + "="*60)
+                print("VICTORY! ALL TREASURES FOUND!")
+                print(f"Final Score: {self.score}")
+                print("YOU WIN!")
+                print("="*60)
+
     def draw_text_2d(self, text, x, y, font, color=(255, 255, 255)):
-        """Draw 2D text on screen"""
         text_surface = font.render(text, True, color)
         text_data = pygame.image.tostring(text_surface, "RGBA", True)
-        
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glWindowPos2d(x, self.display[1] - y - text_surface.get_height())
-        glDrawPixels(text_surface.get_width(), text_surface.get_height(),
-                    GL_RGBA, GL_UNSIGNED_BYTE, text_data)
+        glDrawPixels(text_surface.get_width(), text_surface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, text_data)
         glDisable(GL_BLEND)
     
     def draw_intro_screen(self):
-        """Draw introduction/tutorial screen"""
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        
-        # Switch to 2D rendering
         glMatrixMode(GL_PROJECTION)
         glPushMatrix()
         glLoadIdentity()
@@ -1076,11 +949,8 @@ class FoxTreasureHuntGame:
         glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
         glLoadIdentity()
-        
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_LIGHTING)
-        
-        # Background
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glColor4f(0.1, 0.3, 0.5, 0.95)
@@ -1090,8 +960,6 @@ class FoxTreasureHuntGame:
         glVertex2f(self.display[0] - 50, self.display[1] - 50)
         glVertex2f(50, self.display[1] - 50)
         glEnd()
-        
-        # Border
         glColor4f(1.0, 0.84, 0.0, 1.0)
         glLineWidth(3)
         glBegin(GL_LINE_LOOP)
@@ -1100,88 +968,56 @@ class FoxTreasureHuntGame:
         glVertex2f(self.display[0] - 50, self.display[1] - 50)
         glVertex2f(50, self.display[1] - 50)
         glEnd()
-        
         glDisable(GL_BLEND)
-        
-        # Title
-        self.draw_text_2d("🦊 FOX TREASURE HUNT 🦊", 280, 100, self.big_font, (255, 215, 0))
-        
-        # Instructions
+        self.draw_text_2d("FOX TREASURE HUNT", 280, 100, self.big_font, (255, 215, 0))
         y_pos = 180
         instructions = [
             "HOW TO PLAY:",
             "",
-            "🎯 OBJECTIVE: Find hidden treasures using cryptic hints!",
-            "⏰ TIME LIMIT: You have 2 minutes to find each treasure",
-            "🏆 SCORING: Faster finds = Higher scores!",
+            "OBJECTIVE: Find all 6 hidden treasures!",
+            "TIME: 2 minutes per treasure",
+            "WIN: Find all 6 | LOSE: Timer hits 40s",
             "",
-            "🕹️  JOYSTICK CONTROLS:",
-            "   Forward/Backward/Left/Right - Move the fox",
-            "   Stop - Stop moving",
+            "JOYSTICK: Forward/Backward/Left/Right",
             "",
-            "⌨️  KEYBOARD CONTROLS:",
-            "   Arrow Keys - Move in all directions",
-            "   Q / E - Rotate camera left/right",
-            "   SPACE - Jump (just for fun!)",
-            "   W - Wave, D - Dance",
+            "KEYBOARD: Arrows, SPACE=Jump, W=Wave, D=Dance",
+            "F = Toggle Front/Back View",
             "",
-            "💡 TIPS:",
-            "   • Read the hint carefully - it describes the location!",
-            "   • Look for the golden spinning treasure chest",
-            "   • Explore houses, landmarks, and nature areas",
-            "   • You'll see sparkles when near the treasure!",
+            "Houses say 'worth exploring!' when close",
             "",
-            "Press ENTER or SPACE to start your adventure!"
+            "Press ENTER or SPACE to start!"
         ]
-        
         for line in instructions:
-            if line.startswith("HOW TO PLAY") or line.startswith("🕹️") or line.startswith("⌨️") or line.startswith("💡"):
+            if line.startswith("HOW") or line.startswith("JOY") or line.startswith("KEY") or line.startswith("F =") or line.startswith("Houses"):
                 color = (255, 215, 0)
                 font = self.font
-            elif line.startswith("🎯") or line.startswith("⏰") or line.startswith("🏆"):
-                color = (100, 255, 100)
+            elif "WIN" in line or "LOSE" in line:
+                color = (100, 255, 100) if "WIN" in line else (255, 100, 100)
                 font = self.small_font
             else:
                 color = (255, 255, 255)
                 font = self.small_font
-            
             self.draw_text_2d(line, 80, y_pos, font, color)
             y_pos += 30
-        
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_LIGHTING)
-        
         glPopMatrix()
         glMatrixMode(GL_PROJECTION)
         glPopMatrix()
         glMatrixMode(GL_MODELVIEW)
-        
         pygame.display.flip()
     
     def draw_game_over_screen(self):
-        """Draw game over screen"""
-        # Still render the 3D world in background
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
-        
-        camera_distance = 12
-        camera_height = 6
-        camera_angle = math.radians(self.fox.rotation[1])
-        
-        cam_x = self.fox.position[0] + math.sin(camera_angle) * camera_distance
-        cam_z = self.fox.position[2] + math.cos(camera_angle) * camera_distance
-        
-        gluLookAt(
-            cam_x, camera_height, cam_z,
-            self.fox.position[0], self.fox.position[1] + 1, self.fox.position[2],
-            0, 1, 0
-        )
-        
-        self.environment.draw()
+        angle_rad = math.radians(self.fox.rotation[1])
+        cam_dist = 12
+        cam_x = self.fox.position[0] - math.sin(angle_rad) * cam_dist if not self.front_view else self.fox.position[0] + math.sin(angle_rad) * cam_dist
+        cam_z = self.fox.position[2] - math.cos(angle_rad) * cam_dist if not self.front_view else self.fox.position[2] + math.cos(angle_rad) * cam_dist
+        gluLookAt(cam_x, 6, cam_z, self.fox.position[0], self.fox.position[1] + 1, self.fox.position[2], 0, 1, 0)
+        self.environment.draw(self.fox.position)
         self.fox.update_animation()
         self.fox.draw()
-        
-        # Switch to 2D
         glMatrixMode(GL_PROJECTION)
         glPushMatrix()
         glLoadIdentity()
@@ -1189,51 +1025,35 @@ class FoxTreasureHuntGame:
         glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
         glLoadIdentity()
-        
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_LIGHTING)
-        
-        # Semi-transparent overlay
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        
-        if self.game_state == 'lost':
-            glColor4f(0.5, 0.0, 0.0, 0.8)
-        else:
-            glColor4f(0.0, 0.5, 0.0, 0.8)
-            
+        glColor4f(0.0, 0.5, 0.0 if self.game_state == 'won' else 0.5, 0.0, 0.0, 0.8)
         glBegin(GL_QUADS)
         glVertex2f(0, 0)
         glVertex2f(self.display[0], 0)
         glVertex2f(self.display[0], self.display[1])
         glVertex2f(0, self.display[1])
         glEnd()
-        
         glDisable(GL_BLEND)
-        
-        # Game over text
-        if self.game_state == 'lost':
-            self.draw_text_2d("⏰ TIME'S UP!", 350, 250, self.big_font, (255, 100, 100))
+        if self.game_state == 'won':
+            self.draw_text_2d("YOU WIN!", 380, 250, self.big_font, (100, 255, 100))
         else:
-            self.draw_text_2d("🎉 TREASURE FOUND!", 300, 250, self.big_font, (100, 255, 100))
-        
-        self.draw_text_2d(f"Treasures Found: {self.treasures_found}", 380, 330, self.font, (255, 255, 255))
-        self.draw_text_2d(f"Final Score: {self.score}", 400, 370, self.font, (255, 215, 0))
-        self.draw_text_2d("Press ENTER to play again or ESC to quit", 260, 450, self.small_font, (200, 200, 200))
-        
+            self.draw_text_2d("YOU LOSE!", 380, 250, self.big_font, (255, 100, 100))
+        self.draw_text_2d(f"Treasures: {self.treasures_found}/6", 380, 330, self.font, (255, 255, 255))
+        self.draw_text_2d(f"Score: {self.score}", 400, 370, self.font, (255, 215, 0))
+        self.draw_text_2d("ENTER = Play Again | ESC = Quit", 300, 450, self.small_font, (200, 200, 200))
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_LIGHTING)
-        
         glPopMatrix()
         glMatrixMode(GL_PROJECTION)
         glPopMatrix()
         glMatrixMode(GL_MODELVIEW)
     
     def draw_hud(self):
-        """Draw HUD overlay with hints, timer, and score"""
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_LIGHTING)
-        
         glMatrixMode(GL_PROJECTION)
         glPushMatrix()
         glLoadIdentity()
@@ -1241,8 +1061,6 @@ class FoxTreasureHuntGame:
         glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
         glLoadIdentity()
-        
-        # Hint box background
         if self.environment.current_treasure:
             glEnable(GL_BLEND)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -1253,8 +1071,6 @@ class FoxTreasureHuntGame:
             glVertex2f(self.display[0] - 10, 100)
             glVertex2f(10, 100)
             glEnd()
-            
-            # Gold border
             glColor4f(1.0, 0.84, 0.0, 1.0)
             glLineWidth(2)
             glBegin(GL_LINE_LOOP)
@@ -1263,11 +1079,8 @@ class FoxTreasureHuntGame:
             glVertex2f(self.display[0] - 10, 100)
             glVertex2f(10, 100)
             glEnd()
-            
             glDisable(GL_BLEND)
-        
-        # Timer box (top right)
-        timer_color = (255, 100, 100) if self.timer < 30 else (255, 215, 0) if self.timer < 60 else (100, 255, 100)
+        timer_color = (255, 100, 100) if self.timer < 40 else (255, 215, 0) if self.timer < 60 else (100, 255, 100)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glColor4f(0.1, 0.1, 0.1, 0.85)
@@ -1278,10 +1091,7 @@ class FoxTreasureHuntGame:
         glVertex2f(self.display[0] - 220, 120)
         glEnd()
         glDisable(GL_BLEND)
-        
-        # Score box (top right, below timer)
         glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glColor4f(0.1, 0.1, 0.1, 0.85)
         glBegin(GL_QUADS)
         glVertex2f(self.display[0] - 220, 130)
@@ -1290,18 +1100,13 @@ class FoxTreasureHuntGame:
         glVertex2f(self.display[0] - 220, 210)
         glEnd()
         glDisable(GL_BLEND)
-        
         glPopMatrix()
         glMatrixMode(GL_PROJECTION)
         glPopMatrix()
         glMatrixMode(GL_MODELVIEW)
-        
-        # Draw text on top
         if self.environment.current_treasure:
             hint = self.environment.current_treasure['hint']
-            self.draw_text_2d("🗺️  TREASURE HINT:", 25, 30, self.font, (255, 215, 0))
-            
-            # Word wrap hint text
+            self.draw_text_2d("TREASURE HINT:", 25, 30, self.font, (255, 215, 0))
             words = hint.split()
             line = ""
             y = 60
@@ -1315,47 +1120,39 @@ class FoxTreasureHuntGame:
                     line = test_line
             if line:
                 self.draw_text_2d(line, 25, y, self.small_font, (255, 255, 255))
-        
-        # Timer
         minutes = int(self.timer // 60)
         seconds = int(self.timer % 60)
-        self.draw_text_2d("⏰ TIME:", self.display[0] - 200, 30, self.font, (255, 215, 0))
+        self.draw_text_2d("TIME:", self.display[0] - 200, 30, self.font, (255, 215, 0))
         self.draw_text_2d(f"{minutes}:{seconds:02d}", self.display[0] - 150, 65, self.big_font, timer_color)
-        
-        # Score
-        self.draw_text_2d("🏆 SCORE:", self.display[0] - 200, 150, self.font, (255, 215, 0))
-        self.draw_text_2d(f"{self.score}", self.display[0] - 150, 180, self.font, (100, 255, 100))
-        
-        # Distance to treasure (helper)
+        progress = f"{self.treasures_found}/6"
+        self.draw_text_2d("TREASURES:", self.display[0] - 200, 150, self.font, (255, 215, 0))
+        self.draw_text_2d(progress, self.display[0] - 150, 180, self.font, 
+                         (100, 255, 100) if self.treasures_found == 6 else (255, 215, 0))
         if self.environment.current_treasure:
             tx, tz = self.environment.current_treasure['pos']
             distance = math.sqrt((self.fox.position[0] - tx)**2 + (self.fox.position[2] - tz)**2)
-            
             if distance < 10:
-                proximity_text = "🔥 VERY CLOSE!"
-                color = (255, 100, 100)
+                txt, col = "VERY CLOSE!", (255, 100, 100)
             elif distance < 20:
-                proximity_text = "🌟 Getting warmer..."
-                color = (255, 200, 100)
+                txt, col = "Getting warmer...", (255, 200, 100)
             elif distance < 30:
-                proximity_text = "💨 Keep searching..."
-                color = (200, 200, 255)
+                txt, col = "Keep searching...", (200, 200, 255)
             else:
-                proximity_text = "🧭 Far away"
-                color = (150, 150, 150)
-            
-            self.draw_text_2d(proximity_text, self.display[0] - 200, 240, self.small_font, color)
-        
+                txt, col = "Far away", (150, 150, 150)
+            self.draw_text_2d(txt, self.display[0] - 200, 240, self.small_font, col)
+        view_text = "FRONT VIEW" if self.front_view else "BACK VIEW"
+        self.draw_text_2d(f"VIEW: {view_text} (F to toggle)", 10, self.display[1] - 40, self.small_font, (255, 255, 100))
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_LIGHTING)
     
     def reset_game(self):
-        """Reset game to initial state"""
         self.fox.position = [0, 0, -10]
         self.fox.rotation = [0, 0, 0]
         self.fox.is_walking = False
         self.fox.is_dancing = False
         self.fox.is_waving = False
+        self.environment.used_landmarks = []
+        self.environment.all_landmarks_used = False
         self.environment.spawn_new_treasure()
         self.timer = 120
         self.score = 0
@@ -1363,26 +1160,22 @@ class FoxTreasureHuntGame:
         self.game_state = 'playing'
         self.current_direction = None
         self.movement_timeout = 0
+        self.front_view = False  # Reset to back view
     
     def run(self):
-        """Main game loop"""
         print("\n" + "="*60)
-        print("🦊 FOX TREASURE HUNT GAME 🦊")
+        print("FOX TREASURE HUNT - F = TOGGLE FRONT/BACK VIEW")
         print("="*60)
-        
         if self.bt_receiver.connect():
             self.bt_receiver.start_listening()
-            print("\n✓ Bluetooth active!")
+            print("\nBluetooth active!")
         else:
-            print("\n⚠ Keyboard only")
-        
+            print("\nKeyboard only")
         print("\n" + "="*60)
         
         while self.running:
-            # Handle intro screen
             if self.game_state == 'intro':
                 self.draw_intro_screen()
-                
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.running = False
@@ -1391,15 +1184,13 @@ class FoxTreasureHuntGame:
                             self.running = False
                         elif event.key in [pygame.K_RETURN, pygame.K_SPACE]:
                             self.game_state = 'playing'
-                            print("\n🎮 GAME STARTED! Good luck finding the treasure!")
+                            print("\nGAME STARTED! Find all 6 treasures!")
                             print("="*60)
-                
                 self.clock.tick(60)
                 continue
             
-            # Handle game over screen
             if self.game_state in ['won', 'lost']:
-                
+                self.draw_game_over_screen()
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.running = False
@@ -1408,18 +1199,19 @@ class FoxTreasureHuntGame:
                             self.running = False
                         elif event.key == pygame.K_RETURN:
                             self.reset_game()
-                
                 pygame.display.flip()
                 self.clock.tick(60)
                 continue
             
-            # Normal gameplay
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
+                    elif event.key == pygame.K_f:
+                        self.front_view = not self.front_view
+                        print(f"Camera switched to {'FRONT' if self.front_view else 'BACK'} view!")
                     elif event.key == pygame.K_UP:
                         self.handle_command('forward')
                     elif event.key == pygame.K_DOWN:
@@ -1439,13 +1231,7 @@ class FoxTreasureHuntGame:
                     elif event.key == pygame.K_e:
                         self.handle_command('rotate_right')
                 elif event.type == pygame.KEYUP:
-                    if event.key == pygame.K_UP and self.current_direction == 'forward':
-                        self.handle_command('stop')
-                    elif event.key == pygame.K_DOWN and self.current_direction == 'backward':
-                        self.handle_command('stop')
-                    elif event.key == pygame.K_LEFT and self.current_direction == 'left':
-                        self.handle_command('stop')
-                    elif event.key == pygame.K_RIGHT and self.current_direction == 'right':
+                    if event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
                         self.handle_command('stop')
             
             command = self.bt_receiver.get_command()
@@ -1458,25 +1244,25 @@ class FoxTreasureHuntGame:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             glLoadIdentity()
             
-            camera_distance = 12
-            camera_height = 6
-            camera_angle = math.radians(self.fox.rotation[1])
-            
-            cam_x = self.fox.position[0] + math.sin(camera_angle) * camera_distance
-            cam_z = self.fox.position[2] + math.cos(camera_angle) * camera_distance
-            
+            # CAMERA: Toggle between BACK and FRONT view
+            angle_rad = math.radians(self.fox.rotation[1])
+            cam_dist = 12
+            if self.front_view:
+                cam_x = self.fox.position[0] + math.sin(angle_rad) * cam_dist
+                cam_z = self.fox.position[2] + math.cos(angle_rad) * cam_dist
+            else:
+                cam_x = self.fox.position[0] - math.sin(angle_rad) * cam_dist
+                cam_z = self.fox.position[2] - math.cos(angle_rad) * cam_dist
             gluLookAt(
-                cam_x, camera_height, cam_z,
+                cam_x, 6, cam_z,
                 self.fox.position[0], self.fox.position[1] + 1, self.fox.position[2],
                 0, 1, 0
             )
             
-            self.environment.draw()
+            self.environment.draw(self.fox.position)
             self.fox.update_animation()
             self.fox.draw()
-            
             self.draw_hud()
-            
             pygame.display.flip()
             self.clock.tick(60)
         
